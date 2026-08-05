@@ -1,13 +1,87 @@
 {
-    "atomType": "Molecule",
-    "x": 0,
-    "y": 0,
-    "uniqueID": "id-2824",
-    "name": "selected.EdgesByShape",
-    "topLevel": true,
-    "allAtoms": [],
-    "allConnectors": [],
-    "unitsKey": "Unitless",
-    "fileTypeVersion": 1,
-    "filetypeVersion": 1
+  "atomType": "Molecule",
+  "x": 0,
+  "y": 0,
+  "uniqueID": "id-2824",
+  "name": "selected.EdgesByShape",
+  "ioValues": [
+    {
+      "name": "edgesOf",
+      "ioValue": "__GEOMETRY_INPUT__"
+    },
+    {
+      "name": "intersecting",
+      "ioValue": "__GEOMETRY_INPUT__"
+    }
+  ],
+  "topLevel": true,
+  "allAtoms": [
+    {
+      "atomType": "Output",
+      "x": 0.98,
+      "y": 0.5,
+      "uniqueID": "id-2825",
+      "ioValues": [
+        {
+          "name": "number or geometry",
+          "ioValue": "__GEOMETRY_INPUT__"
+        }
+      ]
+    },
+    {
+      "atomType": "Code",
+      "x": 0.34505208333333337,
+      "y": 0.44857142857142857,
+      "uniqueID": "id-2827",
+      "ioValues": [
+        {
+          "name": "input",
+          "ioValue": "__GEOMETRY_INPUT__"
+        },
+        {
+          "name": "boundingShape",
+          "ioValue": "__GEOMETRY_INPUT__"
+        }
+      ],
+      "interpreterVersion": 1,
+      "code": "function run(input: Assembly, boundingShape: Assembly) {\n  const bounds: replicad.Shape3D[] = []\n  boundingShape.onLeafs((leaf) => {\n    if (leaf.is3D()) {\n      bounds.push(leaf.geometry)\n    }\n    return leaf;\n  })\n\n  if (bounds.length == 0) {\n    return input;\n  }\n\n  console.log(`Using ${bounds.length} bounding shapes`)\n\n  return input.onLeafs((leaf) => {\n    if (leaf.geometry instanceof replicad.Drawing) {\n      throw new Error(\"Drawings have no Edges. Input must be 3d\")\n    }\n    // identify new indexes to mark as selected\n    const selectedIndexes = []\n    for (const bound of bounds) {\n      const finder = new replicad.EdgeFinder().inShape(bound)\n      const foundEdges = finder.find(leaf.geometry)\n      const allEdges = leaf.geometry.edges;\n      const indexes = foundEdges.map((f) => allEdges.findIndex((edge) => edge.isSame(f)));\n      console.log(`found edges: ${foundEdges} indexes: ${indexes}`)\n      selectedIndexes.push(...indexes)\n    }\n\n    if (leaf.selection == undefined) {\n      leaf.selection = { edges: [] }\n    }\n    const before = leaf.selection.edges as number[];\n    leaf.selection.edges = [... new Set([...before, ...selectedIndexes])]\n    console.log(`updated selection list ${before} to ${leaf.selection.edges}`)\n    return leaf;\n  })\n}",
+      "compiledCode": "\"use strict\";\nfunction run(input, boundingShape) {\n    const bounds = [];\n    boundingShape.onLeafs((leaf) => {\n        if (leaf.is3D()) {\n            bounds.push(leaf.geometry);\n        }\n        return leaf;\n    });\n    if (bounds.length == 0) {\n        return input;\n    }\n    console.log(`Using ${bounds.length} bounding shapes`);\n    return input.onLeafs((leaf) => {\n        if (leaf.geometry instanceof replicad.Drawing) {\n            throw new Error(\"Drawings have no Edges. Input must be 3d\");\n        }\n        // identify new indexes to mark as selected\n        const selectedIndexes = [];\n        for (const bound of bounds) {\n            const finder = new replicad.EdgeFinder().inShape(bound);\n            const foundEdges = finder.find(leaf.geometry);\n            const allEdges = leaf.geometry.edges;\n            const indexes = foundEdges.map((f) => allEdges.findIndex((edge) => edge.isSame(f)));\n            console.log(`found edges: ${foundEdges} indexes: ${indexes}`);\n            selectedIndexes.push(...indexes);\n        }\n        if (leaf.selection == undefined) {\n            leaf.selection = { edges: [] };\n        }\n        const before = leaf.selection.edges;\n        leaf.selection.edges = [...new Set([...before, ...selectedIndexes])];\n        console.log(`updated selection list ${before} to ${leaf.selection.edges}`);\n        return leaf;\n    });\n}\n"
+    },
+    {
+      "atomType": "Input",
+      "x": 0.025384615384615384,
+      "y": 0.21428571428571427,
+      "uniqueID": "id-2847",
+      "name": "edgesOf",
+      "type": "geometry"
+    },
+    {
+      "atomType": "Input",
+      "x": 0.025384615384615384,
+      "y": 0.4828571428571429,
+      "uniqueID": "id-2850",
+      "name": "intersecting",
+      "type": "geometry"
+    }
+  ],
+  "allConnectors": [
+    {
+      "ap2Name": "number or geometry",
+      "ap1ID": "id-2827",
+      "ap2ID": "id-2825"
+    },
+    {
+      "ap2Name": "input",
+      "ap1ID": "id-2847",
+      "ap2ID": "id-2827"
+    },
+    {
+      "ap2Name": "boundingShape",
+      "ap1ID": "id-2850",
+      "ap2ID": "id-2827"
+    }
+  ],
+  "unitsKey": "Unitless",
+  "fileTypeVersion": 1,
+  "filetypeVersion": 1
 }
